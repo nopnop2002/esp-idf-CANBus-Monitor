@@ -56,6 +56,9 @@ Need converter to connect with Windows PC.
 
 (*1) N/C for SN65HVD232
 
+4. Termination resistance   
+I used 150 ohms.   
+
 # Test Circuit   
 ```
    +-----------+ +-----------+ +-----------+ 
