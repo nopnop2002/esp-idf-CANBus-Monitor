@@ -31,7 +31,7 @@ Windows applications can be downloaded here.
 
 2. USB-TTL Converter   
 ESP32 development board has USB.   
-This USB connects to Linux and is used for writing the firmware and displaying the LOG.
+This USB connects to Linux and is used for writing the firmware and displaying the LOG.   
 Need converter to connect with Windows PC.   
 
 |Converter||ESP32|
@@ -42,6 +42,7 @@ Need converter to connect with Windows PC.
 
 
 3. SN65HVD23x canbus module   
+
 |SN65HVD23x||ESP32||
 |:-:|:-:|:-:|:-:|
 |D(CTX)|--|GPIO21||
