@@ -16,7 +16,7 @@ So, I made the hardware side with ESP32.
 ```
 +-------------+           +-------------+           +-------------+            +-------------+
 | Windows     |           |   USB-TTL   |           |             |            | SN65HVD23x  |
-| Application |<--(USB)-->|  Converter  |<--(TTL)-->|    ESP32    |<--(TWAI)-->|   canbus    |<--(CAN BUS)-->CAN Network
+| Application |<--(USB)-->|  Converter  |<--(TTL)-->|    ESP32    |<--(TWAI)-->|   CAN-BUS   |<--(CAN BUS)-->CAN Network
 |             |           |             |           |             |            | Transceiver |
 +-------------+           +-------------+           +-------------+            +-------------|
 ```
@@ -41,7 +41,7 @@ Need converter to connect with Windows PC.
 |GND|--|GND|
 
 
-3. SN65HVD23x canbus module   
+3. SN65HVD23x CAN-BUS Transceiver   
 
 |SN65HVD23x||ESP32||
 |:-:|:-:|:-:|:-:|
