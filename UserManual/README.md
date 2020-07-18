@@ -128,8 +128,10 @@ Disable configure.
 ![USBCAN-309](https://user-images.githubusercontent.com/6020549/87839960-340d4f00-c8d8-11ea-9aa3-1919172427d1.jpg)
 
 ![USBCAN-311](https://user-images.githubusercontent.com/6020549/87839962-37083f80-c8d8-11ea-98a9-60f98c278f0f.jpg)
+When 0x107 is received, 0x123 is automatically sent.   
 
 ![USBCAN-313](https://user-images.githubusercontent.com/6020549/87839965-3a033000-c8d8-11ea-88cc-0a058cc21373.jpg)
+These function is not supported.   
 
 ## Monitor Error Counter
 ![USBCAN-451](https://user-images.githubusercontent.com/6020549/87840007-69b23800-c8d8-11ea-94a5-8abd9ac79282.jpg)
