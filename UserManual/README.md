@@ -117,11 +117,30 @@ Disable configure.
 
 
 ## Auto replay
+![USBCAN-301](https://user-images.githubusercontent.com/6020549/87839949-28218d00-c8d8-11ea-96ed-a5aadb38493e.jpg)
 
+![USBCAN-303](https://user-images.githubusercontent.com/6020549/87839951-2b1c7d80-c8d8-11ea-9ad1-2e9e7e5e598c.jpg)
+
+![USBCAN-305](https://user-images.githubusercontent.com/6020549/87839954-2ce64100-c8d8-11ea-9cc0-3750c167ace4.jpg)
+
+![USBCAN-307](https://user-images.githubusercontent.com/6020549/87839958-2f489b00-c8d8-11ea-96ea-a31a62ef2f73.jpg)
+
+![USBCAN-309](https://user-images.githubusercontent.com/6020549/87839960-340d4f00-c8d8-11ea-9aa3-1919172427d1.jpg)
+
+![USBCAN-311](https://user-images.githubusercontent.com/6020549/87839962-37083f80-c8d8-11ea-98a9-60f98c278f0f.jpg)
+
+![USBCAN-313](https://user-images.githubusercontent.com/6020549/87839965-3a033000-c8d8-11ea-88cc-0a058cc21373.jpg)
 
 ## Monitor Error Counter
+![USBCAN-451](https://user-images.githubusercontent.com/6020549/87840007-69b23800-c8d8-11ea-94a5-8abd9ac79282.jpg)
+
+![USBCAN-453](https://user-images.githubusercontent.com/6020549/87840010-6cad2880-c8d8-11ea-934f-e93f66793cf4.jpg)
 
 
-## Grid control
+## Display control
+![USBCAN-401](https://user-images.githubusercontent.com/6020549/87839983-53a47780-c8d8-11ea-879a-0c7f88f10f40.jpg)
 
+![USBCAN-403](https://user-images.githubusercontent.com/6020549/87839986-569f6800-c8d8-11ea-8a8b-041ea0c6cf5d.jpg)
+
+![USBCAN-405](https://user-images.githubusercontent.com/6020549/87839990-599a5880-c8d8-11ea-8d12-839c5d93bda4.jpg)
 
