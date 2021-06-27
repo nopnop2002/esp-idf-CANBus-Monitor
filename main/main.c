@@ -765,11 +765,11 @@ void app_main(void)
 	xQueue_uart_rx = xQueueCreate( 10, sizeof(UART_t) );
 	configASSERT( xQueue_uart_rx );
 	xQueue_uart_tx = xQueueCreate( 10, sizeof(UART_t) );
-	configASSERT( xQueue_uart_rx );
+	configASSERT( xQueue_uart_tx );
 	xQueue_twai_rx = xQueueCreate( 10, sizeof(twai_message_t) );
 	configASSERT( xQueue_twai_rx );
 	xQueue_twai_tx = xQueueCreate( 10, sizeof(twai_message_t) );
-	configASSERT( xQueue_twai_rx );
+	configASSERT( xQueue_twai_tx );
 	xQueue_wifi_tx = xQueueCreate( 10, sizeof(twai_message_t) );
 	configASSERT( xQueue_wifi_tx );
 
