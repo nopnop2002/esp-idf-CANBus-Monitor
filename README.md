@@ -154,6 +154,6 @@ You can use recv.py as the receiver.
 - Connect ESP32 and Windows PC using USB-TTL Converter.   
 - Start a Windows application.   
 
-# User manual   
+# Windows application User manual   
 See [here](https://github.com/nopnop2002/esp-idf-CANBus-Monitor/tree/master/UserManual).   
 
