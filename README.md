@@ -141,7 +141,7 @@ idf.py flash
 CAN received messages can be broadcast using UDP.   
 ![config-wifi-2](https://user-images.githubusercontent.com/6020549/126859066-a4e6f428-c67b-4b0a-bb8c-99627020f5a6.jpg)
 
-You can use recv.py.   
+You can use recv.py as the receiver.   
 ![USBCAN-501](https://user-images.githubusercontent.com/6020549/87840019-78005400-c8d8-11ea-9d68-e71a846fbc0b.jpg)
 
 
