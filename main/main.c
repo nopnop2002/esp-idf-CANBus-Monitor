@@ -32,21 +32,15 @@
 
 #define RX_BUF_SIZE		128
 
+#if 0
 #define TXD_PIN (GPIO_NUM_4)
 #define RXD_PIN (GPIO_NUM_5)
 
 #define TX_GPIO_NUM		21
 #define RX_GPIO_NUM		22
+#endif
 
-/* The examples use WiFi configuration that you can set via project configuration menu
-
-   If you'd rather not, just change the below entries to strings with
-   the config you want - ie #define EXAMPLE_WIFI_SSID "mywifissid"
-*/
-#define EXAMPLE_ESP_WIFI_SSID	   CONFIG_ESP_WIFI_SSID
-#define EXAMPLE_ESP_WIFI_PASS	   CONFIG_ESP_WIFI_PASSWORD
-#define EXAMPLE_ESP_MAXIMUM_RETRY  CONFIG_ESP_MAXIMUM_RETRY
-
+#if CONFIG_ENABLE_UDP
 /* FreeRTOS event group to signal when we are connected*/
 static EventGroupHandle_t s_wifi_event_group;
 
@@ -55,15 +49,14 @@ static EventGroupHandle_t s_wifi_event_group;
  * - we failed to connect after the maximum amount of retries */
 #define WIFI_CONNECTED_BIT BIT0
 #define WIFI_FAIL_BIT	   BIT1
+#endif
 
 
 static const char *UART_TX_TASK_TAG = "UART_TX_TASK";
 static const char *UART_RX_TASK_TAG = "UART_RX_TASK";
 static const char *TWAI_TX_TASK_TAG = "TWAI_TX_TASK";
 static const char *TWAI_RX_TASK_TAG = "TWAI_RX_TASK";
-static const char *WIFI_TASK_TAG = "WIFI_TASK";
 static const char *CONTROL_TASK_TAG = "CONTROL_TASK";
-static const char *TAG = "wifi station";
 
 typedef struct {
 	int		bytes;
@@ -80,17 +73,21 @@ static QueueHandle_t xQueue_uart_rx;
 static QueueHandle_t xQueue_uart_tx;
 static QueueHandle_t xQueue_twai_rx;
 static QueueHandle_t xQueue_twai_tx;
-static QueueHandle_t xQueue_wifi_tx;
 static EventGroupHandle_t xEventGroup;
 static SemaphoreHandle_t ctrl_task_sem;
 
 #define TWAI_START_BIT		BIT0
 #define TWAI_STATUS_BIT		BIT4
 
-static int s_retry_num = 0;
 
 static int g_recv_error = 0;
 static int g_send_error = 0;
+
+#if CONFIG_ENABLE_UDP
+static QueueHandle_t xQueue_wifi_tx;
+static const char *TAG = "wifi station";
+
+static int s_retry_num = 0;
 
 static void event_handler(void* arg, esp_event_base_t event_base,
 								int32_t event_id, void* event_data)
@@ -98,7 +95,7 @@ static void event_handler(void* arg, esp_event_base_t event_base,
 	if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_START) {
 		esp_wifi_connect();
 	} else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED) {
-		if (s_retry_num < EXAMPLE_ESP_MAXIMUM_RETRY) {
+		if (s_retry_num < CONFIG_ESP_MAXIMUM_RETRY) {
 			esp_wifi_connect();
 			s_retry_num++;
 			ESP_LOGI(TAG, "retry to connect to the AP");
@@ -143,8 +140,8 @@ bool wifi_init_sta(void)
 
 	wifi_config_t wifi_config = {
 		.sta = {
-			.ssid = EXAMPLE_ESP_WIFI_SSID,
-			.password = EXAMPLE_ESP_WIFI_PASS,
+			.ssid = CONFIG_ESP_WIFI_SSID,
+			.password = CONFIG_ESP_WIFI_PASSWORD,
 			/* Setting a password implies station will connect to all security modes including WEP/WPA.
 			 * However these modes are deprecated and not advisable to be used. Incase your Access point
 			 * doesn't support WPA2, these mode can be enabled by commenting below line */
@@ -174,11 +171,11 @@ bool wifi_init_sta(void)
 	 * happened. */
 	if (bits & WIFI_CONNECTED_BIT) {
 		ESP_LOGI(TAG, "connected to ap SSID:%s password:%s",
-				 EXAMPLE_ESP_WIFI_SSID, EXAMPLE_ESP_WIFI_PASS);
+				 CONFIG_ESP_WIFI_SSID, CONFIG_ESP_WIFI_PASSWORD);
 		ret = true;
 	} else if (bits & WIFI_FAIL_BIT) {
 		ESP_LOGI(TAG, "Failed to connect to SSID:%s, password:%s",
-				 EXAMPLE_ESP_WIFI_SSID, EXAMPLE_ESP_WIFI_PASS);
+				 CONFIG_ESP_WIFI_SSID, CONFIG_ESP_WIFI_PASSWORD);
 	} else {
 		ESP_LOGE(TAG, "UNEXPECTED EVENT");
 	}
@@ -189,6 +186,7 @@ bool wifi_init_sta(void)
 	vEventGroupDelete(s_wifi_event_group);
 	return ret;
 }
+#endif
 
 void uart_init(void) {
 	const uart_config_t uart_config = {
@@ -202,7 +200,8 @@ void uart_init(void) {
 	// We won't use a buffer for sending data.
 	uart_driver_install(UART_NUM_1, RX_BUF_SIZE * 2, 0, 0, NULL, 0);
 	uart_param_config(UART_NUM_1, &uart_config);
-	uart_set_pin(UART_NUM_1, TXD_PIN, RXD_PIN, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
+	//uart_set_pin(UART_NUM_1, TXD_PIN, RXD_PIN, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
+	uart_set_pin(UART_NUM_1, CONFIG_UART_TX_GPIO, CONFIG_UART_RX_GPIO, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
 }
 
 static void uart_tx_task(void *arg)
@@ -320,6 +319,9 @@ static void twai_transmit_task(void *arg)
 
 }
 
+#if CONFIG_ENABLE_UDP
+static const char *WIFI_TASK_TAG = "WIFI_TASK";
+
 static void wifi_broadcast_task(void *arg)
 {
 	esp_log_level_set(WIFI_TASK_TAG, ESP_LOG_INFO);
@@ -345,17 +347,6 @@ static void wifi_broadcast_task(void *arg)
 		ESP_LOGI(WIFI_TASK_TAG,"twai_receive identifier=0x%x flags=0x%x-0x%x-0x%x data_length_code=%d",
 			twaiBuf.identifier, twaiBuf.flags, twaiBuf.extd, twaiBuf.rtr, twaiBuf.data_length_code);
 
-#if 0
-		cJSON *root = cJSON_CreateObject();
-		esp_chip_info_t chip_info;
-		esp_chip_info(&chip_info);
-		cJSON_AddStringToObject(root, "version", IDF_VER);
-		cJSON_AddNumberToObject(root, "cores", chip_info.cores);
-		const char *sys_info = cJSON_Print(root);
-		free((void *)sys_info);
-		cJSON_Delete(root);
-#endif
-
 		// JSON Serialize
 		cJSON *root = cJSON_CreateObject();
 		if (twaiBuf.rtr == 0) {
@@ -375,8 +366,11 @@ static void wifi_broadcast_task(void *arg)
 		for(int i=0;i<twaiBuf.data_length_code;i++) {
 			i_numbers[i] = twaiBuf.data[i];
 		}
-		intArray = cJSON_CreateIntArray(i_numbers, twaiBuf.data_length_code);
-		cJSON_AddItemToObject(root, "Data", intArray);
+		
+		if (twaiBuf.data_length_code > 0) {
+			intArray = cJSON_CreateIntArray(i_numbers, twaiBuf.data_length_code);
+			cJSON_AddItemToObject(root, "Data", intArray);
+		}
 		const char *my_json_string = cJSON_Print(root);
 		ESP_LOGI(WIFI_TASK_TAG, "my_json_string\n%s",my_json_string);
 
@@ -396,6 +390,7 @@ static void wifi_broadcast_task(void *arg)
 	vTaskDelete( NULL );
 
 }
+#endif
 
 
 bool isValidId(CONFIG_t config, uint32_t identifier) 
@@ -535,17 +530,8 @@ static void control_task(void *arg)
 				static const twai_timing_config_t t_config6 = TWAI_TIMING_CONFIG_100KBITS();
 				static const twai_timing_config_t t_config7 = TWAI_TIMING_CONFIG_50KBITS();
 
-#if 0
-				static const twai_general_config_t g_config = 
-					{.mode = TWAI_MODE_NORMAL,
-					.tx_io = TX_GPIO_NUM, .rx_io = RX_GPIO_NUM,
-					.clkout_io = TWAI_IO_UNUSED, .bus_off_io = TWAI_IO_UNUSED,
-					.tx_queue_len = 5, .rx_queue_len = 5,
-					.alerts_enabled = TWAI_ALERT_NONE,
-					.clkout_divider = 0};
-#else
-				static const twai_general_config_t g_config = TWAI_GENERAL_CONFIG_DEFAULT(TX_GPIO_NUM, RX_GPIO_NUM, TWAI_MODE_NORMAL);
-#endif
+				//static const twai_general_config_t g_config = TWAI_GENERAL_CONFIG_DEFAULT(TX_GPIO_NUM, RX_GPIO_NUM, TWAI_MODE_NORMAL);
+				static const twai_general_config_t g_config = TWAI_GENERAL_CONFIG_DEFAULT(CONFIG_CTX_GPIO, CONFIG_CRX_GPIO, TWAI_MODE_NORMAL);
 
 				// Set Bit rate
 				int driverWillInstall = 0;
@@ -733,9 +719,11 @@ static void control_task(void *arg)
 
 			}
 
+#if CONFIG_ENABLE_UDP
 			if (xQueueSend(xQueue_wifi_tx, &twaiBuf, portMAX_DELAY) != pdPASS) {
 				ESP_LOGE(CONTROL_TASK_TAG, "xQueueSend Fail");
 			}
+#endif
 
 		}
 		vTaskDelay(1);
@@ -753,10 +741,12 @@ void app_main(void)
 	}
 	ESP_ERROR_CHECK(ret);
 
+#if CONFIG_ENABLE_UDP
 	// WiFi initialize
 	if (wifi_init_sta() == false) {
 		while(1) vTaskDelay(10);
 	}
+#endif
 
 	// uart initialize
 	uart_init();
@@ -770,8 +760,10 @@ void app_main(void)
 	configASSERT( xQueue_twai_rx );
 	xQueue_twai_tx = xQueueCreate( 10, sizeof(twai_message_t) );
 	configASSERT( xQueue_twai_tx );
+#if CONFIG_ENABLE_UDP
 	xQueue_wifi_tx = xQueueCreate( 10, sizeof(twai_message_t) );
 	configASSERT( xQueue_wifi_tx );
+#endif
 
 	// Create Eventgroup
 	xEventGroup = xEventGroupCreate();
@@ -787,6 +779,8 @@ void app_main(void)
 	xTaskCreate(uart_tx_task, "uart_tx", 1024*4, NULL, 2, NULL);
 	xTaskCreate(twai_receive_task, "twai_rx", 1024*4, NULL, 2, NULL);
 	xTaskCreate(twai_transmit_task, "twai_tx", 1024*4, NULL, 2, NULL);
+#if CONFIG_ENABLE_UDP
 	xTaskCreate(wifi_broadcast_task, "wifi_tx", 1024*4, NULL, 2, NULL);
+#endif
 	xTaskCreate(control_task, "control", 1024*4, NULL, 4, NULL);
 }

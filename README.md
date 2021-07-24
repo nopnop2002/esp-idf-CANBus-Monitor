@@ -38,77 +38,116 @@ ESP32 development board has USB.
 This USB connects to Linux and is used for writing the firmware and displaying the LOG.   
 Need converter to connect with Windows PC.   
 
-|Converter||ESP32|
-|:-:|:-:|:-:|
-|RXD|--|GPIO4|
-|TXD|--|GPIO5|
-|GND|--|GND|
+|Converter||ESP32||
+|:-:|:-:|:-:|:-:|
+|RXD|--|GPIO4|(*1)|
+|TXD|--|GPIO5|(*1)|
+|GND|--|GND||
+
+(*1) You can change using menuconfig. But it may not work with other GPIOs.  
 
 
 3. SN65HVD23x CAN-BUS Transceiver   
 
-|SN65HVD23x||ESP32||
-|:-:|:-:|:-:|:-:|
-|D(CTX)|--|GPIO21||
-|GND|--|GND||
-|Vcc|--|3.3V||
-|R(CRX)|--|GPIO22||
-|Vref|--|N/C||
-|CANL|--||To CAN Bus|
-|CANH|--||To CAN Bus|
-|RS|--|GND(*1)||
+|SN65HVD23x||ESP32|ESP32-S2|ESP32-C3||
+|:-:|:-:|:-:|:-:|:-:|:-:|
+|D(CTX)|--|GPIO21|GPIO17|GPIO9|(*1)|
+|GND|--|GND|GND|GND||
+|Vcc|--|3.3V|3.3V|3.3V||
+|R(CRX)|--|GPIO22|GPIO18|GPIO10|(*1)|
+|Vref|--|N/C|N/C|N/C||
+|CANL|--||||To CAN Bus|
+|CANH|--||||To CAN Bus|
+|RS|--|GND|GND|GND|(*2)|
 
-(*1) N/C for SN65HVD232
+(*1) You can change using menuconfig. But it may not work with other GPIOs.  
+
+(*2) N/C for SN65HVD232
 
 4. Termination resistance   
 I used 150 ohms.   
 
 # Test Circuit   
 ```
-   +-----------+ +-----------+ +-----------+ 
-   | Atmega328 | | Atmega328 | |   ESP32   | 
-   |           | |           | |           | 
-   | Transmit  | | Receive   | | 21    22  | 
-   +-----------+ +-----------+ +-----------+ 
-     |       |    |        |     |       |   
-   +-----------+ +-----------+   |       |   
-   |           | |           |   |       |   
-   |  MCP2515  | |  MCP2515  |   |       |   
-   |           | |           |   |       |   
-   +-----------+ +-----------+   |       |   
-     |      |      |      |      |       |   
-   +-----------+ +-----------+ +-----------+ 
-   |           | |           | | D       R | 
-   |  MCP2551  | |  MCP2551  | |   VP230   | 
-   | H      L  | | H      L  | | H       L | 
-   +-----------+ +-----------+ +-----------+ 
-     |       |     |       |     |       |   
-     +--^^^--+     |       |     +--^^^--+
-     |   R1  |     |       |     |   R2  |   
- |---+-------|-----+-------|-----+-------|---| BackBorn H
-             |             |             |
-             |             |             |
-             |             |             |
- |-----------+-------------+-------------+---| BackBorn L
+   +-----------+   +-----------+   +-----------+ 
+   | Atmega328 |   | Atmega328 |   |   ESP32   | 
+   |           |   |           |   |           | 
+   | Transmit  |   | Receive   |   | 21    22  | 
+   +-----------+   +-----------+   +-----------+ 
+     |       |      |        |       |       |   
+   +-----------+   +-----------+     |       |   
+   |           |   |           |     |       |   
+   |  MCP2515  |   |  MCP2515  |     |       |   
+   |           |   |           |     |       |   
+   +-----------+   +-----------+     |       |   
+     |      |        |      |        |       |   
+   +-----------+   +-----------+   +-----------+ 
+   |           |   |           |   | D       R | 
+   |  MCP2551  |   |  MCP2551  |   |   VP230   | 
+   | H      L  |   | H      L  |   | H       L | 
+   +-----------+   +-----------+   +-----------+ 
+     |       |       |       |       |       |   
+     +--^^^--+       |       |       +--^^^--+
+     |   R1  |       |       |       |   R2  |   
+ |---+-------|-------+-------|-------+-------|---| BackBorn H
+             |               |               |
+             |               |               |
+             |               |               |
+ |-----------+---------------+---------------+---| BackBorn L
 
       +--^^^--+:Terminaror register
       R1:120 ohms
       R2:150 ohms(Not working at 120 ohms)
 ```
 
-# Install   
+# Installation for ESP32
 ```
 git clone https://github.com/nopnop2002/esp-idf-CANBus-Monitor
 cd esp-idf-CANBus-Monitor
-make menuconfig
-make flash
+idf.py set-target esp32
+idf.py menuconfig
+idf.py flash
 ```
 
-# Configure   
+# Installation for ESP32-S2
+```
+git clone https://github.com/nopnop2002/esp-idf-CANBus-Monitor
+cd esp-idf-CANBus-Monitor
+idf.py set-target esp32s2
+idf.py menuconfig
+idf.py flash
+```
 
-![config-1](https://user-images.githubusercontent.com/6020549/87838761-096cc780-c8d3-11ea-9fdb-d82ef5b7ce1f.jpg)
+# Installation for ESP32-C3
+```
+git clone https://github.com/nopnop2002/esp-idf-CANBus-Monitor
+cd esp-idf-CANBus-Monitor
+idf.py set-target esp32c3
+idf.py menuconfig
+idf.py flash
+```
 
-![config-2](https://user-images.githubusercontent.com/6020549/87838768-0c67b800-c8d3-11ea-83f4-3635688b44bb.jpg)
+# Configuration
+
+![config-main](https://user-images.githubusercontent.com/6020549/126859035-9c83d0b7-14ba-4bc0-8246-0a394887cffa.jpg)
+![config-app](https://user-images.githubusercontent.com/6020549/126859038-305727ec-84ca-40e8-89a2-322a505c2b60.jpg)
+
+## CAN Setting
+![config-can](https://user-images.githubusercontent.com/6020549/126859050-bf104e35-c149-4059-9182-f4f9d2e2f853.jpg)
+
+## WiFi Setting
+![config-wifi-1](https://user-images.githubusercontent.com/6020549/126859053-6a3bc2c3-fec7-41fc-be2c-355a0d790437.jpg)
+
+CAN received messages can be broadcast using UDP.   
+![config-wifi-2](https://user-images.githubusercontent.com/6020549/126859066-a4e6f428-c67b-4b0a-bb8c-99627020f5a6.jpg)
+
+You can use recv.py.   
+![USBCAN-501](https://user-images.githubusercontent.com/6020549/87840019-78005400-c8d8-11ea-9d68-e71a846fbc0b.jpg)
+
+
+## UART Setting
+![config-uart](https://user-images.githubusercontent.com/6020549/126859099-c411069e-17d6-439e-928a-9ff6ec21c5b6.jpg)
+
 
 # How to use   
 - Write firmware to ESP32.   
@@ -118,7 +157,3 @@ make flash
 # User manual   
 See [here](https://github.com/nopnop2002/esp-idf-CANBus-Monitor/tree/master/UserManual).   
 
-# CAN receive message transfer   
-CAN receive messages are broadcast using UDP.   
-You can use recv.py.   
-![USBCAN-501](https://user-images.githubusercontent.com/6020549/87840019-78005400-c8d8-11ea-9d68-e71a846fbc0b.jpg)
