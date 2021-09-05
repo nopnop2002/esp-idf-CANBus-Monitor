@@ -152,6 +152,7 @@ You can use recv.py as the receiver.
 # How to use   
 - Write firmware to ESP32.   
 - Connect ESP32 and Windows PC using USB-TTL Converter.   
+- Add ESP32 to CanBus.   
 - Start a Windows application.   
 
 # Windows application User manual   
