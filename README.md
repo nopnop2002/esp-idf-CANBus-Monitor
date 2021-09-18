@@ -22,8 +22,8 @@ So, I made the hardware side with ESP32.
 ```
 
 # Software requirement    
-esp-idf v4.2-dev-2243 or later.   
-Use twai(Two-Wire Automotive Interface) driver instead of can driver.   
+esp-idf v4.4 or later.   
+This is because this version supports ESP32-C3.   
 
 # Hardware requirements
 
