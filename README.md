@@ -28,7 +28,7 @@ This is because this version supports ESP32-C3.
 # Hardware requirements
 
 1. Windows PC   
-Windows applications can be downloaded here.
+Windows applications can be downloaded from here.
    - [V7.10](https://github.com/SeeedDocument/USB-CAN_Analyzer/tree/master/res/USB-CAN%20software%20and%20drive(v7.10)/Program)   
    - [V7.20](https://github.com/SeeedDocument/USB-CAN-Analyzer/tree/master/res/V7.20)   
    - [V8.00](https://github.com/SeeedDocument/USB-CAN-Analyzer/tree/master/res/Program)   
