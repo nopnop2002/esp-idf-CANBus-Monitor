@@ -49,6 +49,11 @@ Need converter to connect with Windows PC.
 
 3. SN65HVD23x CAN-BUS Transceiver   
 
+
+4. Termination resistance   
+I used 150 ohms.   
+
+# Wireing   
 |SN65HVD23x||ESP32|ESP32-S2|ESP32-C3||
 |:-:|:-:|:-:|:-:|:-:|:-:|
 |D(CTX)|--|GPIO21|GPIO17|GPIO9|(*1)|
@@ -63,9 +68,6 @@ Need converter to connect with Windows PC.
 (*1) You can change using menuconfig. But it may not work with other GPIOs.  
 
 (*2) N/C for SN65HVD232
-
-4. Termination resistance   
-I used 150 ohms.   
 
 # Test Circuit   
 ```
