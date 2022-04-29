@@ -38,11 +38,11 @@ ESP32 development board has USB.
 This USB connects to Linux and is used for writing the firmware and displaying the LOG.   
 Need converter to connect with Windows PC.   
 
-|Converter||ESP32||
+|Converter||ESP32|ESP32-S2/S3|ESP32-C3||
 |:-:|:-:|:-:|:-:|
-|RXD|--|GPIO4|(*1)|
-|TXD|--|GPIO5|(*1)|
-|GND|--|GND||
+|RXD|--|GPIO4|GPIO17|GPIO4|(*1)|
+|TXD|--|GPIO5|GPIO17|GPIO5|(*1)|
+|GND|--|GND|GND|GND||
 
 (*1) You can change using menuconfig. But it may not work with other GPIOs.  
 
@@ -54,12 +54,12 @@ Need converter to connect with Windows PC.
 I used 150 ohms.   
 
 # Wireing   
-|SN65HVD23x||ESP32|ESP32-S2|ESP32-C3||
+|SN65HVD23x||ESP32|ESP32-S2/S3|ESP32-C3||
 |:-:|:-:|:-:|:-:|:-:|:-:|
-|D(CTX)|--|GPIO21|GPIO17|GPIO9|(*1)|
+|D(CTX)|--|GPIO21|GPIO19|GPIO9|(*1)|
 |GND|--|GND|GND|GND||
 |Vcc|--|3.3V|3.3V|3.3V||
-|R(CRX)|--|GPIO22|GPIO18|GPIO10|(*1)|
+|R(CRX)|--|GPIO22|GPIO20|GPIO10|(*1)|
 |Vref|--|N/C|N/C|N/C||
 |CANL|--||||To CAN Bus|
 |CANH|--||||To CAN Bus|
@@ -102,29 +102,11 @@ I used 150 ohms.
       R2:150 ohms(Not working at 120 ohms)
 ```
 
-# Installation for ESP32
+# Installation
 ```
 git clone https://github.com/nopnop2002/esp-idf-CANBus-Monitor
 cd esp-idf-CANBus-Monitor
-idf.py set-target esp32
-idf.py menuconfig
-idf.py flash
-```
-
-# Installation for ESP32-S2
-```
-git clone https://github.com/nopnop2002/esp-idf-CANBus-Monitor
-cd esp-idf-CANBus-Monitor
-idf.py set-target esp32s2
-idf.py menuconfig
-idf.py flash
-```
-
-# Installation for ESP32-C3
-```
-git clone https://github.com/nopnop2002/esp-idf-CANBus-Monitor
-cd esp-idf-CANBus-Monitor
-idf.py set-target esp32c3
+idf.py set-target {esp32/esp32s2/esp32s3/esp32c3}
 idf.py menuconfig
 idf.py flash
 ```
@@ -143,7 +125,7 @@ idf.py flash
 CAN received messages can be broadcast using UDP.   
 ![config-wifi-2](https://user-images.githubusercontent.com/6020549/126859066-a4e6f428-c67b-4b0a-bb8c-99627020f5a6.jpg)
 
-You can use recv.py as the receiver.   
+You can use ```udp-receive.py``` as the receiver.   
 ![USBCAN-501](https://user-images.githubusercontent.com/6020549/87840019-78005400-c8d8-11ea-9d68-e71a846fbc0b.jpg)
 
 
@@ -152,9 +134,9 @@ You can use recv.py as the receiver.
 
 
 # How to use   
+- Add ESP32 to CanBus.   
 - Write firmware to ESP32.   
 - Connect ESP32 and Windows PC using USB-TTL Converter.   
-- Add ESP32 to CanBus.   
 - Start a Windows application.   
 
 # Windows application User manual   

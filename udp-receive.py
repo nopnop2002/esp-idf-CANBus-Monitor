@@ -7,4 +7,4 @@ s.setblocking(0)
 while True:
     result = select.select([s],[],[])
     msg = result[0][0].recv(1024)
-    print msg.strip()
+    print(msg.strip())
