@@ -39,7 +39,7 @@ This USB connects to Linux and is used for writing the firmware and displaying t
 Need converter to connect with Windows PC.   
 
 |Converter||ESP32|ESP32-S2/S3|ESP32-C3||
-|:-:|:-:|:-:|:-:|
+|:-:|:-:|:-:|:-:|:-:|:-:|
 |RXD|--|GPIO4|GPIO17|GPIO4|(*1)|
 |TXD|--|GPIO5|GPIO17|GPIO5|(*1)|
 |GND|--|GND|GND|GND||
