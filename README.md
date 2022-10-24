@@ -142,3 +142,4 @@ You can use ```udp-receive.py``` as the receiver.
 # Windows application User manual   
 See [here](https://github.com/nopnop2002/esp-idf-CANBus-Monitor/tree/master/UserManual).   
 
+Official document is [here](https://github.com/SeeedDocument/USB-CAN-Analyzer/tree/master/res/Document).
