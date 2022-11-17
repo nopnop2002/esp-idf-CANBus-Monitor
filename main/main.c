@@ -6,7 +6,9 @@
 	 software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
 	 CONDITIONS OF ANY KIND, either express or implied.
 */
+
 #include <stdio.h>
+#include <inttypes.h>
 #include <string.h>
 #include <string.h>
 #include <sys/socket.h>
@@ -264,7 +266,7 @@ static void twai_receive_task(void *arg)
 	
 	while (1) {
 		EventBits_t eventBit = xEventGroupGetBits(xEventGroup);
-		ESP_LOGD(TWAI_RX_TASK_TAG,"eventBit=0x%x", eventBit);
+		ESP_LOGD(TWAI_RX_TASK_TAG,"eventBit=0x%"PRIx32, eventBit);
 		if ( (eventBit & TWAI_START_BIT) != TWAI_START_BIT) {
 			ESP_LOGD(TWAI_RX_TASK_TAG,"eventBit not set");
 			xEventGroupClearBits( xEventGroup, TWAI_STATUS_BIT );
@@ -277,7 +279,7 @@ static void twai_receive_task(void *arg)
 			esp_err_t ret = twai_receive(&rx_msg, pdMS_TO_TICKS(1000));
 			xSemaphoreGive(ctrl_task_sem);
 			if (ret == ESP_OK) {
-				ESP_LOGI(TWAI_RX_TASK_TAG,"twai_receive identifier=0x%x flags=0x%x data_length_code=%d",
+				ESP_LOGI(TWAI_RX_TASK_TAG,"twai_receive identifier=0x%"PRIx32" flags=0x%"PRIx32" data_length_code=%d",
 				rx_msg.identifier, rx_msg.flags, rx_msg.data_length_code);
 				if (xQueueSend(xQueue_twai_rx, &rx_msg, portMAX_DELAY) != pdPASS) {
 					ESP_LOGE(TWAI_RX_TASK_TAG, "xQueueSend Fail");
@@ -301,7 +303,7 @@ static void twai_transmit_task(void *arg)
 	while (1) {
 		//Waiting for TWAI transmit event.
 		if (xQueueReceive(xQueue_twai_tx, &tx_msg, portMAX_DELAY) == pdTRUE) {
-			ESP_LOGI(TWAI_TX_TASK_TAG, "tx_msg.identifier=[0x%x]", tx_msg.identifier);
+			ESP_LOGI(TWAI_TX_TASK_TAG, "tx_msg.identifier=[0x%"PRIx32"]", tx_msg.identifier);
 			//ESP_LOG_BUFFER_HEXDUMP(TWAI_TX_TASK_TAG, tx_msg.data, tx_msg.data_length_code, ESP_LOG_INFO);
 			xSemaphoreTake(ctrl_task_sem, portMAX_DELAY);
 			esp_err_t ret = twai_transmit(&tx_msg, pdMS_TO_TICKS(1000));
@@ -342,7 +344,7 @@ static void wifi_broadcast_task(void *arg)
 
 	while(1) {
 		xQueueReceive(xQueue_wifi_tx, &twaiBuf, portMAX_DELAY);
-		ESP_LOGI(WIFI_TASK_TAG,"twai_receive identifier=0x%x flags=0x%x-0x%x-0x%x data_length_code=%d",
+		ESP_LOGI(WIFI_TASK_TAG,"twai_receive identifier=0x%"PRIx32" flags=0x%"PRIx32"-0x%x-0x%x data_length_code=%d",
 			twaiBuf.identifier, twaiBuf.flags, twaiBuf.extd, twaiBuf.rtr, twaiBuf.data_length_code);
 
 		// JSON Serialize
@@ -411,7 +413,7 @@ uint8_t calcCRC(uint8_t * buffer, int length)
 	for(int i=0;i<length;i++) {
 		crc = crc + buffer[i];
 	}
-	ESP_LOGD(CONTROL_TASK_TAG, "crc=0x%x", crc);
+	ESP_LOGD(CONTROL_TASK_TAG, "crc=0x%"PRIx32, crc);
 	return (crc & 0xFF);
 }
 
@@ -446,7 +448,7 @@ static void control_task(void *arg)
 					xEventGroupClearBits( xEventGroup, TWAI_START_BIT );
 					while(1) {
 						EventBits_t eventBit = xEventGroupGetBits(xEventGroup);
-						ESP_LOGD(CONTROL_TASK_TAG,"eventBit=0x%x", eventBit);
+						ESP_LOGD(CONTROL_TASK_TAG,"eventBit=0x%"PRIx32, eventBit);
 						if ( (eventBit & TWAI_STATUS_BIT) != TWAI_STATUS_BIT) break;
 						vTaskDelay(1);
 					}
@@ -470,7 +472,7 @@ static void control_task(void *arg)
 				if (uartBuf.data[4] == 0x01) {
 					acceptance_code = ( (uartBuf.data[6] & 0x7) << 8) + uartBuf.data[5];
 					acceptance_mask = ( (uartBuf.data[10] & 0x7) << 8) + uartBuf.data[9];
-					ESP_LOGI(CONTROL_TASK_TAG, "Standard filter code=0x%03x mask=0x%03x",acceptance_code, acceptance_mask);
+					ESP_LOGI(CONTROL_TASK_TAG, "Standard filter code=0x%03"PRIx32" mask=0x%03"PRIx32, acceptance_code, acceptance_mask);
 					f_config.acceptance_code = (acceptance_code << 21);
 					f_config.acceptance_mask = ~(acceptance_mask << 21);
 				} else {
@@ -483,7 +485,7 @@ static void control_task(void *arg)
 #endif
 					acceptance_code = ((uartBuf.data[8] & 0x1F) << 24) + (uartBuf.data[7] << 16) + (uartBuf.data[6] << 8) + uartBuf.data[5];
 					acceptance_mask = ((uartBuf.data[12] & 0x1F) << 24) + (uartBuf.data[11] << 16) + (uartBuf.data[10] << 8) + uartBuf.data[9];
-					ESP_LOGI(CONTROL_TASK_TAG, "Extended filter code=0x%08x mask=0x%08x",acceptance_code, acceptance_mask);
+					ESP_LOGI(CONTROL_TASK_TAG, "Extended filter code=0x%08"PRIx32" mask=0x%08"PRIx32, acceptance_code, acceptance_mask);
 					f_config.acceptance_code = (acceptance_code << 3);
 					f_config.acceptance_mask = ~(acceptance_mask << 3);
 				}
@@ -636,7 +638,7 @@ static void control_task(void *arg)
 				config.enable = uartBuf.data[2];
 				for(int i=0;i<config.counter;i++){
 					config.id[i] = (uartBuf.data[i*4+7] << 24) + (uartBuf.data[i*4+6] << 16) + (uartBuf.data[i*4+5] << 8) + (uartBuf.data[i*4+4]);
-					ESP_LOGI(CONTROL_TASK_TAG, "config.id[%d]=%x",i, config.id[i]);
+					ESP_LOGI(CONTROL_TASK_TAG, "config.id[%d]=0x%"PRIx32, i, config.id[i]);
 				}
 
 			//	Configure the receive ID(Receive ID not uploaded)
@@ -645,7 +647,7 @@ static void control_task(void *arg)
 				config.enable = uartBuf.data[2];
 				for(int i=0;i<config.counter;i++){
 					config.id[i] = (uartBuf.data[i*4+7] << 24) + (uartBuf.data[i*4+6] << 16) + (uartBuf.data[i*4+5] << 8) + (uartBuf.data[i*4+4]);
-					ESP_LOGI(CONTROL_TASK_TAG, "config.id[%d]=%x",i, config.id[i]);
+					ESP_LOGI(CONTROL_TASK_TAG, "config.id[%d]=0x%"PRIx32, i, config.id[i]);
 				}
 
 			//	Monitor
@@ -670,7 +672,7 @@ static void control_task(void *arg)
 
 		//Waiting for TWAI receive event.
 		} else if (xQueueReceive(xQueue_twai_rx, &twaiBuf, 0) == pdTRUE) {
-			ESP_LOGI(CONTROL_TASK_TAG,"twai_receive identifier=0x%x flags=0x%x-0x%x-0x%x data_length_code=%d",
+			ESP_LOGI(CONTROL_TASK_TAG,"twai_receive identifier=0x%"PRIx32" flags=0x%"PRIx32"-0x%x-0x%x data_length_code=%d",
 				twaiBuf.identifier, twaiBuf.flags, twaiBuf.extd, twaiBuf.rtr, twaiBuf.data_length_code);
 			//int ext = twaiBuf.flags & 0x01;
 			//int rtr = twaiBuf.flags & 0x02;

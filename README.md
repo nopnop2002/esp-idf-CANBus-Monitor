@@ -22,7 +22,7 @@ So, I made the hardware side with ESP32.
 ```
 
 # Software requirement    
-esp-idf v4.4 or later.   
+esp-idf v4.4/v5.0.   
 This is because this version supports ESP32-C3.   
 
 # Hardware requirements
@@ -56,10 +56,10 @@ I used 150 ohms.
 # Wireing   
 |SN65HVD23x||ESP32|ESP32-S2/S3|ESP32-C3||
 |:-:|:-:|:-:|:-:|:-:|:-:|
-|D(CTX)|--|GPIO21|GPIO19|GPIO9|(*1)|
+|D(CTX)|--|GPIO21|GPIO19|GPIO0|(*1)|
 |GND|--|GND|GND|GND||
 |Vcc|--|3.3V|3.3V|3.3V||
-|R(CRX)|--|GPIO22|GPIO20|GPIO10|(*1)|
+|R(CRX)|--|GPIO22|GPIO20|GPIO1|(*1)|
 |Vref|--|N/C|N/C|N/C||
 |CANL|--||||To CAN Bus|
 |CANH|--||||To CAN Bus|
