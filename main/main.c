@@ -195,7 +195,11 @@ void uart_init(void) {
 		.parity = UART_PARITY_DISABLE,
 		.stop_bits = UART_STOP_BITS_1,
 		.flow_ctrl = UART_HW_FLOWCTRL_DISABLE,
+#if (ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0))
+		.source_clk = UART_SCLK_DEFAULT,
+#else
 		.source_clk = UART_SCLK_APB,
+#endif
 	};
 	// We won't use a buffer for sending data.
 	uart_driver_install(UART_NUM_1, RX_BUF_SIZE * 2, 0, 0, NULL, 0);

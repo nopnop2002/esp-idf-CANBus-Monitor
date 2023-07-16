@@ -22,8 +22,8 @@ So, I made the hardware side with ESP32.
 ```
 
 # Software requirement    
-esp-idf v4.4/v5.0.   
-This is because this version supports ESP32-C3.   
+ESP-IDF V4.4/V5.x.   
+ESP-IDF V5.1 is required when using ESP32C6.   
 
 # Hardware requirements
 
@@ -38,7 +38,7 @@ ESP32 development board has USB.
 This USB connects to Linux and is used for writing the firmware and displaying the LOG.   
 Need converter to connect with Windows PC.   
 
-|Converter||ESP32|ESP32-S2/S3|ESP32-C3||
+|Converter||ESP32|ESP32-S2/S3|ESP32-C3/C6||
 |:-:|:-:|:-:|:-:|:-:|:-:|
 |RXD|--|GPIO4|GPIO17|GPIO4|(*1)|
 |TXD|--|GPIO5|GPIO18|GPIO5|(*1)|
@@ -54,7 +54,7 @@ Need converter to connect with Windows PC.
 I used 150 ohms.   
 
 # Wireing   
-|SN65HVD23x||ESP32|ESP32-S2/S3|ESP32-C3||
+|SN65HVD23x||ESP32|ESP32-S2/S3|ESP32-C3/C6||
 |:-:|:-:|:-:|:-:|:-:|:-:|
 |D(CTX)|--|GPIO21|GPIO19|GPIO0|(*1)|
 |GND|--|GND|GND|GND||
@@ -106,7 +106,7 @@ I used 150 ohms.
 ```
 git clone https://github.com/nopnop2002/esp-idf-CANBus-Monitor
 cd esp-idf-CANBus-Monitor
-idf.py set-target {esp32/esp32s2/esp32s3/esp32c3}
+idf.py set-target {esp32/esp32s2/esp32s3/esp32c3/esp32c6}
 idf.py menuconfig
 idf.py flash
 ```
