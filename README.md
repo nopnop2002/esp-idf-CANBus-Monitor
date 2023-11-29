@@ -50,6 +50,7 @@ Need converter to connect with Windows PC.
 3. SN65HVD23x CAN-BUS Transceiver   
 SN65HVD23x series has 230/231/232.   
 They differ in standby/sleep mode functionality.   
+Other features are the same.   
 
 4. Termination resistance   
 I used 150 ohms.   
