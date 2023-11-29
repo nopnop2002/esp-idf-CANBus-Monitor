@@ -48,12 +48,9 @@ Need converter to connect with Windows PC.
 
 
 3. SN65HVD23x CAN-BUS Transceiver   
-- SN65HVD230   
- LOW POWER MODE is Standby mode   
-- SN65HVD231   
- LOW POWER MODE is Sleep mode   
-- SN65HVD232   
- No standby or sleep mode   
+SN65HVD230 has LOW POWER MODE in Standby mode.   
+SN65HVD231 has LOW POWER MODE in Sleep mode.   
+SN65HVD232 has neither standby mode nor sleep mode.   
 
 4. Termination resistance   
 I used 150 ohms.   
