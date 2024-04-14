@@ -34,44 +34,6 @@ menu "Application Configuration"
 
 	endmenu
 
-
-	menu "WiFi Setting"
-
-		config ENABLE_UDP
-			bool "Output the received CAN FRAME to UDP broadcast"
-			help
-				Output the received CAN FRAME to UDP broadcast
-
-		config ESP_WIFI_SSID
-			depends on ENABLE_UDP
-			string "WiFi SSID"
-			default "myssid"
-			help
-				SSID (network name) to connect to.
-
-		config ESP_WIFI_PASSWORD
-			depends on ENABLE_UDP
-			string "WiFi Password"
-			default "mypassword"
-			help
-				WiFi password (WPA or WPA2) to connect to.
-	
-		config ESP_MAXIMUM_RETRY
-			depends on ENABLE_UDP
-			int "Maximum retry"
-			default 5
-			help
-				Set the Maximum retry to avoid station reconnecting to the AP unlimited when the AP is really inexistent.
-	
-		config UDP_PORT
-			depends on ENABLE_UDP
-			int "Port number of UDP Broadcast"
-			default 9876
-			help
-				Port number of UDP Broadcast.
-
-	endmenu
-
 	menu "UART Setting"
 
 		config UART_TX_GPIO

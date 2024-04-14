@@ -120,16 +120,6 @@ idf.py flash
 ## CAN Setting
 ![config-can](https://user-images.githubusercontent.com/6020549/126859050-bf104e35-c149-4059-9182-f4f9d2e2f853.jpg)
 
-## WiFi Setting
-![config-wifi-1](https://user-images.githubusercontent.com/6020549/126859053-6a3bc2c3-fec7-41fc-be2c-355a0d790437.jpg)
-
-CAN received messages can be broadcast using UDP.   
-![config-wifi-2](https://user-images.githubusercontent.com/6020549/126859066-a4e6f428-c67b-4b0a-bb8c-99627020f5a6.jpg)
-
-You can use ```udp-receive.py``` as the receiver.   
-![USBCAN-501](https://user-images.githubusercontent.com/6020549/87840019-78005400-c8d8-11ea-9d68-e71a846fbc0b.jpg)
-
-
 ## UART Setting
 ![config-uart](https://user-images.githubusercontent.com/6020549/126859099-c411069e-17d6-439e-928a-9ff6ec21c5b6.jpg)
 

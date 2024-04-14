@@ -42,17 +42,6 @@
 #define RX_GPIO_NUM		22
 #endif
 
-#if CONFIG_ENABLE_UDP
-/* FreeRTOS event group to signal when we are connected*/
-static EventGroupHandle_t s_wifi_event_group;
-
-/* The event group allows multiple bits for each event, but we only care about two events:
- * - we are connected to the AP with an IP
- * - we failed to connect after the maximum amount of retries */
-#define WIFI_CONNECTED_BIT BIT0
-#define WIFI_FAIL_BIT BIT1
-#endif
-
 
 static const char *UART_TX_TASK_TAG = "UART_TX_TASK";
 static const char *UART_RX_TASK_TAG = "UART_RX_TASK";
@@ -84,109 +73,6 @@ static SemaphoreHandle_t ctrl_task_sem;
 
 static int g_recv_error = 0;
 static int g_send_error = 0;
-
-#if CONFIG_ENABLE_UDP
-static QueueHandle_t xQueue_wifi_tx;
-static const char *TAG = "wifi station";
-
-static int s_retry_num = 0;
-
-static void event_handler(void* arg, esp_event_base_t event_base,
-								int32_t event_id, void* event_data)
-{
-	if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_START) {
-		esp_wifi_connect();
-	} else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED) {
-		if (s_retry_num < CONFIG_ESP_MAXIMUM_RETRY) {
-			esp_wifi_connect();
-			s_retry_num++;
-			ESP_LOGI(TAG, "retry to connect to the AP");
-		} else {
-			xEventGroupSetBits(s_wifi_event_group, WIFI_FAIL_BIT);
-		}
-		ESP_LOGI(TAG,"connect to the AP fail");
-	} else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
-		ip_event_got_ip_t* event = (ip_event_got_ip_t*) event_data;
-		ESP_LOGI(TAG, "got ip:" IPSTR, IP2STR(&event->ip_info.ip));
-		s_retry_num = 0;
-		xEventGroupSetBits(s_wifi_event_group, WIFI_CONNECTED_BIT);
-	}
-}
-
-
-bool wifi_init_sta(void)
-{
-	bool ret = false;
-	s_wifi_event_group = xEventGroupCreate();
-
-	ESP_ERROR_CHECK(esp_netif_init());
-
-	ESP_ERROR_CHECK(esp_event_loop_create_default());
-	esp_netif_create_default_wifi_sta();
-
-	wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
-	ESP_ERROR_CHECK(esp_wifi_init(&cfg));
-
-	esp_event_handler_instance_t instance_any_id;
-	esp_event_handler_instance_t instance_got_ip;
-	ESP_ERROR_CHECK(esp_event_handler_instance_register(WIFI_EVENT,
-									ESP_EVENT_ANY_ID,
-									&event_handler,
-									NULL,
-									&instance_any_id));
-	ESP_ERROR_CHECK(esp_event_handler_instance_register(IP_EVENT,
-									IP_EVENT_STA_GOT_IP,
-									&event_handler,
-									NULL,
-									&instance_got_ip));
-
-	wifi_config_t wifi_config = {
-		.sta = {
-			.ssid = CONFIG_ESP_WIFI_SSID,
-			.password = CONFIG_ESP_WIFI_PASSWORD,
-			/* Setting a password implies station will connect to all security modes including WEP/WPA.
-			 * However these modes are deprecated and not advisable to be used. Incase your Access point
-			 * doesn't support WPA2, these mode can be enabled by commenting below line */
-			.threshold.authmode = WIFI_AUTH_WPA2_PSK,
-
-			.pmf_cfg = {
-				.capable = true,
-				.required = false
-			},
-		},
-	};
-	ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA) );
-	ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_config) );
-	ESP_ERROR_CHECK(esp_wifi_start() );
-
-	ESP_LOGI(TAG, "wifi_init_sta finished.");
-
-	/* Waiting until either the connection is established (WIFI_CONNECTED_BIT) or connection failed for the maximum
-	 * number of re-tries (WIFI_FAIL_BIT). The bits are set by event_handler() (see above) */
-	EventBits_t bits = xEventGroupWaitBits(s_wifi_event_group,
-		WIFI_CONNECTED_BIT | WIFI_FAIL_BIT,
-		pdFALSE,
-		pdFALSE,
-		portMAX_DELAY);
-
-	/* xEventGroupWaitBits() returns the bits before the call returned, hence we can test which event actually
-	 * happened. */
-	if (bits & WIFI_CONNECTED_BIT) {
-		ESP_LOGI(TAG, "connected to ap SSID:%s password:%s", CONFIG_ESP_WIFI_SSID, CONFIG_ESP_WIFI_PASSWORD);
-		ret = true;
-	} else if (bits & WIFI_FAIL_BIT) {
-		ESP_LOGI(TAG, "Failed to connect to SSID:%s, password:%s", CONFIG_ESP_WIFI_SSID, CONFIG_ESP_WIFI_PASSWORD);
-	} else {
-		ESP_LOGE(TAG, "UNEXPECTED EVENT");
-	}
-
-	/* The event will not be processed after unregister */
-	ESP_ERROR_CHECK(esp_event_handler_instance_unregister(IP_EVENT, IP_EVENT_STA_GOT_IP, instance_got_ip));
-	ESP_ERROR_CHECK(esp_event_handler_instance_unregister(WIFI_EVENT, ESP_EVENT_ANY_ID, instance_any_id));
-	vEventGroupDelete(s_wifi_event_group);
-	return ret;
-}
-#endif
 
 void uart_init(void) {
 	const uart_config_t uart_config = {
@@ -322,80 +208,6 @@ static void twai_transmit_task(void *arg)
 	}
 
 }
-
-#if CONFIG_ENABLE_UDP
-static const char *WIFI_TASK_TAG = "WIFI_TASK";
-
-static void wifi_broadcast_task(void *arg)
-{
-	esp_log_level_set(WIFI_TASK_TAG, ESP_LOG_INFO);
-	ESP_LOGI(WIFI_TASK_TAG, "Start");
-
-	/* set up address to sendto */
-	struct sockaddr_in addr;
-	memset(&addr, 0, sizeof(addr));
-	addr.sin_family = AF_INET;
-	addr.sin_port = htons(CONFIG_UDP_PORT);
-	addr.sin_addr.s_addr = htonl(INADDR_BROADCAST); /* send message to 255.255.255.255 */
-
-	/* create the socket */
-	int fd;
-	int ret;
-	fd = lwip_socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP ); // Create a UDP socket.
-	LWIP_ASSERT("fd >= 0", fd >= 0);
-
-	twai_message_t twaiBuf;
-
-	while(1) {
-		xQueueReceive(xQueue_wifi_tx, &twaiBuf, portMAX_DELAY);
-		ESP_LOGI(WIFI_TASK_TAG,"twai_receive identifier=0x%"PRIx32" flags=0x%"PRIx32"-0x%x-0x%x data_length_code=%d",
-			twaiBuf.identifier, twaiBuf.flags, twaiBuf.extd, twaiBuf.rtr, twaiBuf.data_length_code);
-
-		// JSON Serialize
-		cJSON *root = cJSON_CreateObject();
-		if (twaiBuf.rtr == 0) {
-			cJSON_AddStringToObject(root, "Type", "Data frame");
-		} else {
-			cJSON_AddStringToObject(root, "Type", "Remote frame");
-		}
-		if (twaiBuf.extd == 0) {
-			cJSON_AddStringToObject(root, "Format", "Standard frame");
-		} else {
-			cJSON_AddStringToObject(root, "Format", "Extended frame");
-		}
-		cJSON_AddNumberToObject(root, "ID", twaiBuf.identifier);
-		cJSON_AddNumberToObject(root, "Length", twaiBuf.data_length_code);
-		cJSON *intArray;
-		int i_numbers[8];
-		for(int i=0;i<twaiBuf.data_length_code;i++) {
-			i_numbers[i] = twaiBuf.data[i];
-		}
-		
-		if (twaiBuf.data_length_code > 0) {
-			intArray = cJSON_CreateIntArray(i_numbers, twaiBuf.data_length_code);
-			cJSON_AddItemToObject(root, "Data", intArray);
-		}
-		const char *my_json_string = cJSON_Print(root);
-		ESP_LOGI(WIFI_TASK_TAG, "my_json_string\n%s",my_json_string);
-
-		// Send UDP broadcast
-		int ret = lwip_sendto(fd, my_json_string, strlen(my_json_string), 0, (struct sockaddr *)&addr, sizeof(addr));
-		LWIP_ASSERT("ret == strlen(my_json_string)", ret == strlen(my_json_string));
-
-		// Cleanup
-		free((void *)my_json_string);
-		cJSON_Delete(root);
-
-	}
-
-	/* close socket. Don't reach here.*/
-	ret = lwip_close(fd);
-	LWIP_ASSERT("ret == 0", ret == 0);
-	vTaskDelete( NULL );
-
-}
-#endif
-
 
 bool isValidId(CONFIG_t config, uint32_t identifier) 
 {
@@ -724,12 +536,6 @@ static void control_task(void *arg)
 
 			}
 
-#if CONFIG_ENABLE_UDP
-			if (xQueueSend(xQueue_wifi_tx, &twaiBuf, portMAX_DELAY) != pdPASS) {
-				ESP_LOGE(CONTROL_TASK_TAG, "xQueueSend Fail");
-			}
-#endif
-
 		}
 		vTaskDelay(1);
 	}
@@ -746,13 +552,6 @@ void app_main(void)
 	}
 	ESP_ERROR_CHECK(ret);
 
-#if CONFIG_ENABLE_UDP
-	// WiFi initialize
-	if (wifi_init_sta() == false) {
-		while(1) vTaskDelay(10);
-	}
-#endif
-
 	// uart initialize
 	uart_init();
 
@@ -765,10 +564,6 @@ void app_main(void)
 	configASSERT( xQueue_twai_rx );
 	xQueue_twai_tx = xQueueCreate( 10, sizeof(twai_message_t) );
 	configASSERT( xQueue_twai_tx );
-#if CONFIG_ENABLE_UDP
-	xQueue_wifi_tx = xQueueCreate( 10, sizeof(twai_message_t) );
-	configASSERT( xQueue_wifi_tx );
-#endif
 
 	// Create Eventgroup
 	xEventGroup = xEventGroupCreate();
@@ -784,8 +579,5 @@ void app_main(void)
 	xTaskCreate(uart_tx_task, "uart_tx", 1024*4, NULL, 2, NULL);
 	xTaskCreate(twai_receive_task, "twai_rx", 1024*4, NULL, 2, NULL);
 	xTaskCreate(twai_transmit_task, "twai_tx", 1024*4, NULL, 2, NULL);
-#if CONFIG_ENABLE_UDP
-	xTaskCreate(wifi_broadcast_task, "wifi_tx", 1024*4, NULL, 2, NULL);
-#endif
 	xTaskCreate(control_task, "control", 1024*4, NULL, 4, NULL);
 }
