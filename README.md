@@ -115,7 +115,7 @@ idf.py flash
 # Configuration
 
 ![config-main](https://user-images.githubusercontent.com/6020549/126859035-9c83d0b7-14ba-4bc0-8246-0a394887cffa.jpg)
-![config-app](https://user-images.githubusercontent.com/6020549/126859038-305727ec-84ca-40e8-89a2-322a505c2b60.jpg)
+![config-app](https://github.com/nopnop2002/esp-idf-CANBus-Monitor/assets/6020549/3dd5b3d2-ce48-4881-ac67-36eb4e45fefc)
 
 ## CAN Setting
 ![config-can](https://user-images.githubusercontent.com/6020549/126859050-bf104e35-c149-4059-9182-f4f9d2e2f853.jpg)
