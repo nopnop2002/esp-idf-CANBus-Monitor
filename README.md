@@ -134,3 +134,16 @@ idf.py flash
 See [here](https://github.com/nopnop2002/esp-idf-CANBus-Monitor/tree/master/UserManual).   
 
 Official document is [here](https://github.com/SeeedDocument/USB-CAN-Analyzer/tree/master/res/Document).
+
+
+# Reference   
+
+https://github.com/nopnop2002/esp-idf-can2http
+
+https://github.com/nopnop2002/esp-idf-can2mqtt
+
+https://github.com/nopnop2002/esp-idf-can2usb
+
+https://github.com/nopnop2002/esp-idf-can2websocket
+
+https://github.com/nopnop2002/esp-idf-can2socket
