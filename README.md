@@ -138,6 +138,8 @@ Official document is [here](https://github.com/SeeedDocument/USB-CAN-Analyzer/tr
 
 # Reference   
 
+https://github.com/nopnop2002/esp-idf-candump
+
 https://github.com/nopnop2002/esp-idf-can2http
 
 https://github.com/nopnop2002/esp-idf-can2mqtt
