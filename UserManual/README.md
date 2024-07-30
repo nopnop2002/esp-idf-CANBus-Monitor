@@ -116,7 +116,7 @@ Disable configure.
 ![USBCAN-227](https://user-images.githubusercontent.com/6020549/87839863-a7fb2780-c8d7-11ea-875d-9960eec94b2c.jpg)
 
 
-## Auto replay
+## Auto reply
 ![USBCAN-301](https://user-images.githubusercontent.com/6020549/87839949-28218d00-c8d8-11ea-96ed-a5aadb38493e.jpg)
 
 ![USBCAN-303](https://user-images.githubusercontent.com/6020549/87839951-2b1c7d80-c8d8-11ea-9ad1-2e9e7e5e598c.jpg)
