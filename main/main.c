@@ -119,6 +119,7 @@ static void uart_rx_task(void *arg)
 	uint8_t* data = (uint8_t*) malloc(RX_BUF_SIZE+1);
 	if (data == NULL) {
 		ESP_LOGE(UART_RX_TASK_TAG, "malloc Fail");
+		vTaskDelete(NULL);
 	}
 	UART_t uartBuf;
 

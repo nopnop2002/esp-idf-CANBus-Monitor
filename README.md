@@ -40,8 +40,8 @@ Need converter to connect with Windows PC.
 
 |Converter||ESP32|ESP32-S2/S3|ESP32-C3/C6||
 |:-:|:-:|:-:|:-:|:-:|:-:|
-|RXD|--|GPIO4|GPIO17|GPIO4|(*1)|
-|TXD|--|GPIO5|GPIO18|GPIO5|(*1)|
+|RXD|--|GPIO4|GPIO4|GPIO4|(*1)|
+|TXD|--|GPIO5|GPIO5|GPIO5|(*1)|
 |GND|--|GND|GND|GND||
 
 (*1) You can change using menuconfig. But it may not work with other GPIOs.  
@@ -57,10 +57,10 @@ I used 150 ohms.
 # Wireing   
 |SN65HVD23x||ESP32|ESP32-S2/S3|ESP32-C3/C6||
 |:-:|:-:|:-:|:-:|:-:|:-:|
-|D(CTX)|--|GPIO21|GPIO19|GPIO0|(*1)|
+|D(CTX)|--|GPIO21|GPIO0|GPIO0|(*1)|
 |GND|--|GND|GND|GND||
 |Vcc|--|3.3V|3.3V|3.3V||
-|R(CRX)|--|GPIO22|GPIO20|GPIO1|(*1)|
+|R(CRX)|--|GPIO22|GPIO1|GPIO1|(*1)|
 |Vref|--|N/C|N/C|N/C||
 |CANL|--||||To CAN Bus|
 |CANH|--||||To CAN Bus|
