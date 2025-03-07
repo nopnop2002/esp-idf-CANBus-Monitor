@@ -54,6 +54,8 @@ Need converter to connect with Windows PC.
 
 (*1) You can change using menuconfig.   
 
+ESP32-S2/S3 has a full-speed USB OTG peripheral with integrated transceivers and is compliant with the USB 1.1 specification.   
+GPIO19 and GPIO20 can be used as D- and D + of USB respectively.   
 On the ESP32S2/S3, you can use USB instead of UART.   
 I used this USB Connector.   
 ![usb-connector](https://user-images.githubusercontent.com/6020549/124848149-3714ba00-dfd7-11eb-8344-8b120790c5c5.JPG)
