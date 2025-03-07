@@ -52,7 +52,7 @@ Need converter to connect with Windows PC.
 |TXD|--|GPIO5|GPIO5|GPIO5|(*1)|
 |GND|--|GND|GND|GND||
 
-(*1) You can change using menuconfig. But it may not work with other GPIOs.  
+(*1) You can change using menuconfig.   
 
 On the ESP32S2/S3, you can use USB instead of UART.   
 I used this USB Connector.   
