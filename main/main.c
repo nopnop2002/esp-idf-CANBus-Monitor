@@ -1,10 +1,10 @@
-/* UART asynchronous example, that uses separate RX and TX tasks
+/*	CAN Monitor example
 
-	 This example code is in the Public Domain (or CC0 licensed, at your option.)
+	This example code is in the Public Domain (or CC0 licensed, at your option.)
 
-	 Unless required by applicable law or agreed to in writing, this
-	 software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-	 CONDITIONS OF ANY KIND, either express or implied.
+	Unless required by applicable law or agreed to in writing, this
+	software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+	CONDITIONS OF ANY KIND, either express or implied.
 */
 
 #include <stdio.h>
@@ -27,24 +27,22 @@
 #include "driver/uart.h"
 #include "driver/gpio.h"
 #include "driver/twai.h" // Update from V4.2
+#include "tinyusb.h"
+#include "tusb_cdc_acm.h"
 #include "cJSON.h"
 
 #include "lwip/err.h"
 #include "lwip/sys.h"
 
-#define RX_BUF_SIZE		128
+#define RX_BUF_SIZE 128
 
-#if 0
-#define TXD_PIN (GPIO_NUM_4)
-#define RXD_PIN (GPIO_NUM_5)
-
-#define TX_GPIO_NUM		21
-#define RX_GPIO_NUM		22
-#endif
-
-
+#if CONFIG_UART_INTERFACE
 static const char *UART_TX_TASK_TAG = "UART_TX_TASK";
 static const char *UART_RX_TASK_TAG = "UART_RX_TASK";
+#else
+static const char *TUSB_TX_TASK_TAG = "TUSB_TX_TASK";
+static const char *TUSB_RX_TASK_TAG = "TUSB_RX_TASK";
+#endif
 static const char *TWAI_TX_TASK_TAG = "TWAI_TX_TASK";
 static const char *TWAI_RX_TASK_TAG = "TWAI_RX_TASK";
 static const char *CONTROL_TASK_TAG = "CONTROL_TASK";
@@ -74,6 +72,7 @@ static SemaphoreHandle_t ctrl_task_sem;
 static int g_recv_error = 0;
 static int g_send_error = 0;
 
+#if CONFIG_UART_INTERFACE
 void uart_init(void) {
 	const uart_config_t uart_config = {
 		.baud_rate = 115200,
@@ -88,10 +87,10 @@ void uart_init(void) {
 #endif
 	};
 	// We won't use a buffer for sending data.
-	uart_driver_install(UART_NUM_1, RX_BUF_SIZE * 2, 0, 0, NULL, 0);
-	uart_param_config(UART_NUM_1, &uart_config);
+	ESP_ERROR_CHECK(uart_driver_install(UART_NUM_1, RX_BUF_SIZE * 2, 0, 0, NULL, 0));
+	ESP_ERROR_CHECK(uart_param_config(UART_NUM_1, &uart_config));
 	//uart_set_pin(UART_NUM_1, TXD_PIN, RXD_PIN, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
-	uart_set_pin(UART_NUM_1, CONFIG_UART_TX_GPIO, CONFIG_UART_RX_GPIO, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
+	ESP_ERROR_CHECK(uart_set_pin(UART_NUM_1, CONFIG_UART_TX_GPIO, CONFIG_UART_RX_GPIO, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE));
 }
 
 static void uart_tx_task(void *arg)
@@ -147,6 +146,73 @@ static void uart_rx_task(void *arg)
 	}
 	free(data);
 }
+#endif
+
+#if CONFIG_USB_INTERFACE
+void tinyusb_cdc_rx_callback(int itf, cdcacm_event_t *event)
+{
+	/* initialization */
+	size_t rxBytes = 0;
+	ESP_LOGD(TUSB_RX_TASK_TAG, "CONFIG_TINYUSB_CDC_RX_BUFSIZE=%d", CONFIG_TINYUSB_CDC_RX_BUFSIZE);
+
+	/* read */
+	uint8_t buf[CONFIG_TINYUSB_CDC_RX_BUFSIZE];
+	esp_err_t ret = tinyusb_cdcacm_read(itf, buf, CONFIG_TINYUSB_CDC_RX_BUFSIZE, &rxBytes);
+	if (ret == ESP_OK) {
+		ESP_LOGD(TUSB_RX_TASK_TAG, "Data from channel=%d rxBytes=%d", itf, rxBytes);
+		ESP_LOG_BUFFER_HEXDUMP(TUSB_RX_TASK_TAG, buf, rxBytes, ESP_LOG_INFO);
+		UART_t uartBuf;
+		uartBuf.bytes = rxBytes;
+		for (int i=0;i<rxBytes;i++) {
+			uartBuf.data[i] = buf[i];
+		}
+		if (xQueueSend(xQueue_uart_rx, &uartBuf, portMAX_DELAY) != pdPASS) {
+			ESP_LOGE(TUSB_RX_TASK_TAG, "xQueueSend Fail");
+		}
+	} else {
+		ESP_LOGE(TUSB_RX_TASK_TAG, "tinyusb_cdcacm_read error");
+	}
+}
+
+void usb_init(void) {
+	const tinyusb_config_t tusb_cfg = {
+		.device_descriptor = NULL,
+		.string_descriptor = NULL,
+		.external_phy = false,
+		.configuration_descriptor = NULL,
+	};
+	ESP_ERROR_CHECK(tinyusb_driver_install(&tusb_cfg));
+
+	tinyusb_config_cdcacm_t acm_cfg = {
+		.usb_dev = TINYUSB_USBDEV_0,
+		.cdc_port = TINYUSB_CDC_ACM_0,
+		.rx_unread_buf_sz = 64,
+		.callback_rx = &tinyusb_cdc_rx_callback, // the first way to register a callback
+		.callback_rx_wanted_char = NULL,
+		//.callback_line_state_changed = &tinyusb_cdc_line_state_changed_callback,
+		.callback_line_coding_changed = NULL
+	};
+	ESP_ERROR_CHECK(tusb_cdc_acm_init(&acm_cfg));
+}
+
+static void tusb_tx_task(void *arg)
+{
+	esp_log_level_set(TUSB_TX_TASK_TAG, ESP_LOG_INFO);
+	ESP_LOGI(TUSB_TX_TASK_TAG, "Start");
+
+	UART_t uartBuf;
+
+	while (1) {
+		//Waiting for UART transmit event.
+		if (xQueueReceive(xQueue_uart_tx, &uartBuf, portMAX_DELAY) == pdTRUE) {
+			ESP_LOGI(TUSB_TX_TASK_TAG, "uartBuf.bytes=%d", uartBuf.bytes);
+			ESP_LOG_BUFFER_HEXDUMP(TUSB_TX_TASK_TAG, uartBuf.data, uartBuf.bytes, ESP_LOG_INFO);
+			tinyusb_cdcacm_write_queue(TINYUSB_CDC_ACM_0, uartBuf.data, uartBuf.bytes);
+			tinyusb_cdcacm_write_flush(TINYUSB_CDC_ACM_0, 0);
+		}
+	}
+}
+#endif
 
 static void twai_receive_task(void *arg)
 {
@@ -170,8 +236,8 @@ static void twai_receive_task(void *arg)
 			esp_err_t ret = twai_receive(&rx_msg, pdMS_TO_TICKS(1000));
 			xSemaphoreGive(ctrl_task_sem);
 			if (ret == ESP_OK) {
-				ESP_LOGI(TWAI_RX_TASK_TAG,"twai_receive identifier=0x%"PRIx32" flags=0x%"PRIx32" data_length_code=%d",
-				rx_msg.identifier, rx_msg.flags, rx_msg.data_length_code);
+				ESP_LOGI(TWAI_RX_TASK_TAG,"twai_receive identifier=0x%"PRIx32" flags=0x%"PRIx32"-0x%x-0x%x data_length_code=%d",
+					rx_msg.identifier, rx_msg.flags, rx_msg.extd, rx_msg.rtr, rx_msg.data_length_code);
 				if (xQueueSend(xQueue_twai_rx, &rx_msg, portMAX_DELAY) != pdPASS) {
 					ESP_LOGE(TWAI_RX_TASK_TAG, "xQueueSend Fail");
 				}
@@ -553,8 +619,13 @@ void app_main(void)
 	}
 	ESP_ERROR_CHECK(ret);
 
-	// uart initialize
+#if CONFIG_UART_INTERFACE
+	// Initialize UART
 	uart_init();
+#else 
+	// Initialize USB
+	usb_init();
+#endif
 
 	// Create Queue
 	xQueue_uart_rx = xQueueCreate( 10, sizeof(UART_t) );
@@ -576,8 +647,12 @@ void app_main(void)
 	xSemaphoreGive(ctrl_task_sem);
 
 	// Create task
+#if CONFIG_UART_INTERFACE
 	xTaskCreate(uart_rx_task, "uart_rx", 1024*4, NULL, 2, NULL);
 	xTaskCreate(uart_tx_task, "uart_tx", 1024*4, NULL, 2, NULL);
+#else
+	xTaskCreate(tusb_tx_task, "tusb_tx", 1024*4, NULL, 2, NULL);
+#endif
 	xTaskCreate(twai_receive_task, "twai_rx", 1024*4, NULL, 2, NULL);
 	xTaskCreate(twai_transmit_task, "twai_tx", 1024*4, NULL, 2, NULL);
 	xTaskCreate(control_task, "control", 1024*4, NULL, 4, NULL);

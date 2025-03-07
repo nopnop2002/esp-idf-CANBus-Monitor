@@ -36,7 +36,24 @@ menu "Application Configuration"
 
 	menu "UART Setting"
 
+		choice INTERFACE
+			prompt "Interface"
+			default UART_INTERFACE
+			help
+				Select Interface.
+			config UART_INTERFACE
+				bool "UART Interface"
+				help
+					UART Interface.
+			config USB_INTERFACE
+				depends on IDF_TARGET_ESP32S2 || IDF_TARGET_ESP32S3
+				bool "USB Interface"
+				help
+					USB Interface.
+		endchoice
+
 		config UART_TX_GPIO
+			depends on UART_INTERFACE
 			int "UART TX GPIO number"
 			range 0 GPIO_RANGE_MAX
 			default  4 if IDF_TARGET_ESP32
@@ -48,6 +65,7 @@ menu "Application Configuration"
 				GPIOs 35-39 are input-only so cannot be used as outputs.
 
 		config UART_RX_GPIO
+			depends on UART_INTERFACE
 			int "UART RX GPIO number"
 			range 0 GPIO_RANGE_MAX
 			default  5 if IDF_TARGET_ESP32

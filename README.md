@@ -20,6 +20,14 @@ So, I made the hardware side with ESP32.
 |             |           |             |           |             |            | Transceiver |
 +-------------+           +-------------+           +-------------+            +-------------|
 ```
+On the ESP32S2/S3, you can use USB instead of UART.   
+```
++-------------+                                     +-------------+            +-------------+
+| Windows     |                                     |             |            | SN65HVD23x  |
+| Application |<--------------(USB)---------------->| ESP32S2/S3  |<--(TWAI)-->|   CAN-BUS   |<--(CAN BUS)-->CAN Network
+|             |                                     |             |            | Transceiver |
++-------------+                                     +-------------+            +-------------|
+```
 
 # Software requirement    
 ESP-IDF V4.4/V5.x.   
@@ -33,7 +41,7 @@ Windows applications can be downloaded from here.
    - [V7.20](https://github.com/SeeedDocument/USB-CAN-Analyzer/tree/master/res/V7.20)   
    - [V8.00](https://github.com/SeeedDocument/USB-CAN-Analyzer/tree/master/res/Program)   
 
-2. USB-TTL Converter   
+2. USB-TTL Converter    
 ESP32 development board has USB.   
 This USB connects to Linux and is used for writing the firmware and displaying the LOG.   
 Need converter to connect with Windows PC.   
@@ -45,6 +53,20 @@ Need converter to connect with Windows PC.
 |GND|--|GND|GND|GND||
 
 (*1) You can change using menuconfig. But it may not work with other GPIOs.  
+
+On the ESP32S2/S3, you can use USB instead of UART.   
+I used this USB Connector.   
+![usb-connector](https://user-images.githubusercontent.com/6020549/124848149-3714ba00-dfd7-11eb-8344-8b120790c5c5.JPG)
+
+```
+ESP32-S2/S3 BOARD          USB CONNECTOR
+                           +--+
+                           | || VCC
+    [GPIO 19]    --------> | || D-
+    [GPIO 20]    --------> | || D+
+    [  GND  ]    --------> | || GND
+                           +--+
+```
 
 3. SN65HVD23x CAN-BUS Transceiver   
 SN65HVD23x series has 230/231/232.   
@@ -113,7 +135,6 @@ idf.py flash
 ```
 
 # Configuration
-
 ![config-main](https://user-images.githubusercontent.com/6020549/126859035-9c83d0b7-14ba-4bc0-8246-0a394887cffa.jpg)
 ![config-app](https://github.com/nopnop2002/esp-idf-CANBus-Monitor/assets/6020549/3dd5b3d2-ce48-4881-ac67-36eb4e45fefc)
 
@@ -121,13 +142,15 @@ idf.py flash
 ![config-can](https://user-images.githubusercontent.com/6020549/126859050-bf104e35-c149-4059-9182-f4f9d2e2f853.jpg)
 
 ## UART Setting
-![config-uart](https://user-images.githubusercontent.com/6020549/126859099-c411069e-17d6-439e-928a-9ff6ec21c5b6.jpg)
-
+- Using UART   
+	![Image](https://github.com/user-attachments/assets/9d51cec4-e042-44f2-bb54-6563cf0e8245)
+- Using USB   
+	![Image](https://github.com/user-attachments/assets/fbf99b97-608d-4f49-b1c7-777362310bc6)
 
 # How to use   
 - Add ESP32 to CanBus.   
 - Write firmware to ESP32.   
-- Connect ESP32 and Windows PC using USB-TTL Converter.   
+- Connect ESP32 and Windows PC using USB-TTL Converter or USB.   
 - Start a Windows application.   
 
 # Windows application User manual   
