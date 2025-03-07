@@ -88,7 +88,7 @@ I used 150 ohms.
 |CANH|--||||To CAN Bus|
 |RS|--|GND|GND|GND|(*2)|
 
-(*1) You can change using menuconfig. But it may not work with other GPIOs.  
+(*1) You can change using menuconfig.   
 
 (*2) N/C for SN65HVD232
 
