@@ -36,47 +36,51 @@ ESP-IDF V4.4 release branch reached EOL in July 2024.
 # Hardware requirements
 
 1. Windows PC   
-Windows applications can be downloaded from here.
-   - [V7.10](https://github.com/SeeedDocument/USB-CAN_Analyzer/tree/master/res/USB-CAN%20software%20and%20drive(v7.10)/Program)   
-   - [V7.20](https://github.com/SeeedDocument/USB-CAN-Analyzer/tree/master/res/V7.20)   
-   - [V8.00](https://github.com/SeeedDocument/USB-CAN-Analyzer/tree/master/res/Program)   
+	Windows applications can be downloaded from here.
+	- [V7.10](https://github.com/SeeedDocument/USB-CAN_Analyzer/tree/master/res/USB-CAN%20software%20and%20drive(v7.10)/Program)   
+	- [V7.20](https://github.com/SeeedDocument/USB-CAN-Analyzer/tree/master/res/V7.20)   
+	- [V8.00](https://github.com/SeeedDocument/USB-CAN-Analyzer/tree/master/res/Program)   
 
-2. USB-TTL Converter    
-ESP32 development board has USB.   
-This USB connects to Linux and is used for writing the firmware and displaying the LOG.   
-Need converter to connect with Windows PC.   
+2. USB-TTL Converter or USB Type-A Femail connector    
+	ESP32 development board has USB.   
+	This USB connects to Linux and is used for writing the firmware and displaying the LOG.   
+	Need converter to connect with Windows PC.   
 
-|Converter||ESP32|ESP32-S2/S3|ESP32-C3/C6||
-|:-:|:-:|:-:|:-:|:-:|:-:|
-|RXD|--|GPIO4|GPIO4|GPIO4|(*1)|
-|TXD|--|GPIO5|GPIO5|GPIO5|(*1)|
-|GND|--|GND|GND|GND||
+	|Converter||ESP32|ESP32-S2/S3|ESP32-C3/C6||
+	|:-:|:-:|:-:|:-:|:-:|:-:|
+	|RXD|--|GPIO4|GPIO4|GPIO4|(*1)|
+	|TXD|--|GPIO5|GPIO5|GPIO5|(*1)|
+	|GND|--|GND|GND|GND||
 
-(*1) You can change using menuconfig.   
+	(*1) You can change using menuconfig.   
 
-ESP32-S2/S3 has a full-speed USB OTG peripheral with integrated transceivers and is compliant with the USB 1.1 specification.   
-GPIO19 and GPIO20 can be used as D- and D + of USB respectively.   
-On the ESP32S2/S3, you can use USB instead of UART.   
-I used this USB Connector.   
-![usb-connector](https://user-images.githubusercontent.com/6020549/124848149-3714ba00-dfd7-11eb-8344-8b120790c5c5.JPG)
+	ESP32-S2/S3 has a full-speed USB OTG peripheral with integrated transceivers and is compliant with the USB 1.1 specification.   
+	GPIO19 and GPIO20 can be used as D- and D + of USB respectively.   
+	On the ESP32S2/S3, you can use USB instead of UART.   
+	I used this USB Connector.   
+	![usb-connector](https://user-images.githubusercontent.com/6020549/124848149-3714ba00-dfd7-11eb-8344-8b120790c5c5.JPG)
 
-```
-ESP32-S2/S3 BOARD          USB CONNECTOR
-                           +--+
-                           | || VCC
-    [GPIO 19]    --------> | || D-
-    [GPIO 20]    --------> | || D+
-    [  GND  ]    --------> | || GND
-                           +--+
-```
+	We can buy this breakout on Ebay or AliExpress.   
+	![usb-conector-11](https://github.com/user-attachments/assets/848998d4-fb0c-4b4f-97ae-0b3ae8b8996a)
+	![usb-conector-12](https://github.com/user-attachments/assets/6fc34dcf-0b13-4233-8c71-07234e8c6d06)
+
+	```
+	ESP32-S2/S3 BOARD          USB CONNECTOR
+	                           +--+
+	                           | || VCC
+	    [GPIO 19]    --------> | || D-
+	    [GPIO 20]    --------> | || D+
+	    [  GND  ]    --------> | || GND
+	                           +--+
+	```
 
 3. SN65HVD23x CAN-BUS Transceiver   
-SN65HVD23x series has 230/231/232.   
-They differ in standby/sleep mode functionality.   
-Other features are the same.   
+	SN65HVD23x series has 230/231/232.   
+	They differ in standby/sleep mode functionality.   
+	Other features are the same.   
 
 4. Termination resistance   
-I used 150 ohms.   
+	I used 150 ohms.   
 
 # Wireing   
 |SN65HVD23x||ESP32|ESP32-S2/S3|ESP32-C3/C6||
