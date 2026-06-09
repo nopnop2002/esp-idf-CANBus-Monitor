@@ -27,8 +27,10 @@
 #include "driver/uart.h"
 #include "driver/gpio.h"
 #include "driver/twai.h" // Update from V4.2
+#if CONFIG_USB_INTERFACE
 #include "tinyusb.h"
 #include "tusb_cdc_acm.h"
+#endif
 #include "cJSON.h"
 
 #include "lwip/err.h"
@@ -102,7 +104,7 @@ static void uart_tx_task(void *arg)
 
 	while (1) {
 		//Waiting for UART transmit event.
-		if (xQueueReceive(xQueue_uart_tx, &uartBuf, portMAX_DELAY) == pdTRUE) {
+		if (xQueueReceive(xQueue_uart_tx, &uartBuf, portMAX_DELAY) == pdPASS) {
 			ESP_LOGI(UART_TX_TASK_TAG, "uartBuf.bytes=%d", uartBuf.bytes);
 			ESP_LOG_BUFFER_HEXDUMP(UART_TX_TASK_TAG, uartBuf.data, uartBuf.bytes, ESP_LOG_INFO);
 			int txBytes = uart_write_bytes(UART_NUM_1, uartBuf.data, uartBuf.bytes);
@@ -204,7 +206,7 @@ static void tusb_tx_task(void *arg)
 
 	while (1) {
 		//Waiting for UART transmit event.
-		if (xQueueReceive(xQueue_uart_tx, &uartBuf, portMAX_DELAY) == pdTRUE) {
+		if (xQueueReceive(xQueue_uart_tx, &uartBuf, portMAX_DELAY) == pdPASS) {
 			ESP_LOGI(TUSB_TX_TASK_TAG, "uartBuf.bytes=%d", uartBuf.bytes);
 			ESP_LOG_BUFFER_HEXDUMP(TUSB_TX_TASK_TAG, uartBuf.data, uartBuf.bytes, ESP_LOG_INFO);
 			tinyusb_cdcacm_write_queue(TINYUSB_CDC_ACM_0, uartBuf.data, uartBuf.bytes);
@@ -259,7 +261,7 @@ static void twai_transmit_task(void *arg)
 
 	while (1) {
 		//Waiting for TWAI transmit event.
-		if (xQueueReceive(xQueue_twai_tx, &tx_msg, portMAX_DELAY) == pdTRUE) {
+		if (xQueueReceive(xQueue_twai_tx, &tx_msg, portMAX_DELAY) == pdPASS) {
 			ESP_LOGI(TWAI_TX_TASK_TAG, "tx_msg.identifier=[0x%"PRIx32"]", tx_msg.identifier);
 			//ESP_LOG_BUFFER_HEXDUMP(TWAI_TX_TASK_TAG, tx_msg.data, tx_msg.data_length_code, ESP_LOG_INFO);
 			xSemaphoreTake(ctrl_task_sem, portMAX_DELAY);
@@ -314,7 +316,7 @@ static void control_task(void *arg)
 
 	while(1) {
 		//Waiting for UART receive event.
-		if (xQueueReceive(xQueue_uart_rx, &uartBuf, 0) == pdTRUE) {
+		if (xQueueReceive(xQueue_uart_rx, &uartBuf, 0) == pdPASS) {
 			ESP_LOGI(CONTROL_TASK_TAG, "uartBuf.bytes=%d", uartBuf.bytes);
 			ESP_LOGI(CONTROL_TASK_TAG, "uartBuf.data[0]=0x%x", uartBuf.data[0]);
 			//ESP_LOG_BUFFER_HEXDUMP(CONTROL_TASK_TAG, uartBuf.data, uartBuf.bytes, ESP_LOG_INFO);
@@ -554,7 +556,7 @@ static void control_task(void *arg)
 			}
 
 		//Waiting for TWAI receive event.
-		} else if (xQueueReceive(xQueue_twai_rx, &twaiBuf, 0) == pdTRUE) {
+		} else if (xQueueReceive(xQueue_twai_rx, &twaiBuf, 0) == pdPASS) {
 			ESP_LOGI(CONTROL_TASK_TAG,"twai_receive identifier=0x%"PRIx32" flags=0x%"PRIx32"-0x%x-0x%x data_length_code=%d",
 				twaiBuf.identifier, twaiBuf.flags, twaiBuf.extd, twaiBuf.rtr, twaiBuf.data_length_code);
 			//int ext = twaiBuf.flags & 0x01;
